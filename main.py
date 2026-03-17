@@ -60,7 +60,7 @@ def main(video_path):
     frame_index = 0
     prev_hoop_gray = None
 
-    print("\n CoreSport AI: Monitoring for shots...")
+    print("\n Basketball Shooting: Monitoring for shots...")
 
     while True:
         ret, frame = cap.read()
@@ -82,7 +82,7 @@ def main(video_path):
             if first_ball_seen_ts is None:
                 first_ball_seen_ts = timestamp
             elif (timestamp - first_ball_seen_ts) >= (3 / fps):
-                
+
                 print(f"timestamp: {first_ball_seen_ts:.2f}s – SHOT_MADE")
                 send_shot_event(first_ball_seen_ts) 
                 
@@ -94,9 +94,9 @@ def main(video_path):
         if cooldown > 0: cooldown -= 1
         
         cv2.rectangle(frame, (hx, hy), (hx+hw, hy+hh), (0, 255, 0) if ball_in_hoop else (255, 255, 255), 2)
-        cv2.putText(frame, "CoreSport AI - Active", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        cv2.putText(frame, "Basketball Shooting - Active", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
         
-        cv2.imshow("CoreSport AI", frame)
+        cv2.imshow("Basketball Shooting", frame)
         
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'): 
