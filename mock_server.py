@@ -2,11 +2,13 @@ from flask import Flask, request, jsonify, render_template_string
 
 app = Flask(__name__)
 
+# In-memory storage for the latest detected event
 data_store = {
     "event": "Waiting for shot...",
     "timestamp": 0.0
 }
 
+# Simple and clean UI dashboard to visualize shot data
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
@@ -36,13 +38,23 @@ HTML_TEMPLATE = """
 
 @app.route('/event', methods=['GET', 'POST'])
 def handle_event():
+    """
+    Handles both incoming shot events (POST) and dashboard viewing (GET).
+    """
     global data_store
+    
     if request.method == 'POST':
+        # Process data sent from the main detection script
         incoming = request.json
         data_store["event"] = incoming.get("event", "none").upper()
         data_store["timestamp"] = incoming.get("timestamp", 0.0)
+        
+        # Return success to the client
         return jsonify({"status": "success"}), 200
+    
+    # Display the dashboard UI
     return render_template_string(HTML_TEMPLATE, data=data_store)
 
 if __name__ == '__main__':
+    # Run the server on port 5000, accessible locally
     app.run(port=5000, host='0.0.0.0')
