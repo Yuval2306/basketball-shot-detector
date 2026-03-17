@@ -1,6 +1,18 @@
 import cv2
 import numpy as np
 import sys
+import requests
+import webbrowser
+
+API_URL = "http://localhost:5000/event"
+
+def send_shot_event(timestamp):
+    payload = {"event": "shot_made", "timestamp": round(float(timestamp), 2)}
+    try:
+        response = requests.post(API_URL, json=payload, timeout=0.8)
+        return response.status_code == 200
+    except requests.exceptions.RequestException:
+        return False
 
 def get_roi_from_user(frame, title):
     print(f"--- Calibration: Please select the {title} and press ENTER ---")
@@ -48,7 +60,7 @@ def main(video_path):
     frame_index = 0
     prev_hoop_gray = None
 
-    print("\nCoreSport AI: Monitoring for shots...")
+    print("\n CoreSport AI: Monitoring for shots...")
 
     while True:
         ret, frame = cap.read()
@@ -70,7 +82,10 @@ def main(video_path):
             if first_ball_seen_ts is None:
                 first_ball_seen_ts = timestamp
             elif (timestamp - first_ball_seen_ts) >= (3 / fps):
+                
                 print(f"timestamp: {first_ball_seen_ts:.2f}s – SHOT_MADE")
+                send_shot_event(first_ball_seen_ts) 
+                
                 cooldown = int(fps * 3)
                 first_ball_seen_ts = None
         else:
@@ -79,10 +94,16 @@ def main(video_path):
         if cooldown > 0: cooldown -= 1
         
         cv2.rectangle(frame, (hx, hy), (hx+hw, hy+hh), (0, 255, 0) if ball_in_hoop else (255, 255, 255), 2)
-        cv2.putText(frame, "Monitoring...", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        cv2.putText(frame, "CoreSport AI - Active", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
         
         cv2.imshow("CoreSport AI", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'): break
+        
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'): 
+            break
+        elif key == ord('o'): 
+            webbrowser.open(API_URL)
+            
         frame_index += 1
 
     cap.release()
