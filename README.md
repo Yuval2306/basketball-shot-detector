@@ -70,6 +70,7 @@ docker run --net=host -v $(pwd)/data:/app/data basketball-detector data/video1.m
 
 > `--net=host` allows the container to communicate with the mock server running on your machine.
 
+> **Note:** Docker won't work with this project as-is, since the calibration step requires a display window. Run locally with `python main.py` instead.
 --- 
 
 ## Solution Approach
